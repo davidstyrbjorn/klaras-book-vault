@@ -2,13 +2,17 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 
 	"database/sql"
+	"net/http"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
 const DBName = "./library.db"
+const ISBNurl = "http://openlibrary.org/api/books?bibkeys=ISBN:%v&jscmd=details&format=json"
 const (
 	UNREAD     = "unread"
 	READ       = "read"
@@ -23,7 +27,21 @@ type Book struct {
 }
 
 func LookupBookFromISBN(isbn string) Book {
+	// http://openlibrary.org/api/books?bibkeys=ISBN:1931498717&jscmd=details&format=json
+
 	//TODO:  Find out the info we need to fill out a book struct
+	resp, err := http.Get(fmt.Sprintf(ISBNurl, isbn))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sb := string(body)
+	log.Printf(sb)
 
 	return Book{
 		isbn:        "",
@@ -40,6 +58,10 @@ func FuzzySearchBooks(books []Book, search string) []Book {
 func main() {
 	fmt.Println("Library Init")
 
+	LookupBookFromISBN("9780060598242")
+
+	return
+
 	database, err := sql.Open("sqlite3", DBName)
 	if err != nil {
 		log.Fatal(err)
@@ -47,7 +69,8 @@ func main() {
 	defer database.Close()
 
 	createTableSQL := `CREATE TABLE IF NOT EXISTS Books(
-		"isbn" TEXT PRIMARY KEY,
+		"id" PRIMARY KEY INC INTEGER
+		"isbn" TEXT,
 		"title" TEXT,
 		"page" INTEGER,
 		"status" TEXT
