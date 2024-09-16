@@ -14,19 +14,22 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const DBName = "./library.db"
-const ISBNurl = "http://openlibrary.org/api/books?bibkeys=ISBN:%v&jscmd=details&format=json"
-const (
-	UNREAD     = "unread"
-	READ       = "read"
-	LOANED_OUT = "loaned out"
-)
+// State definition & decleration
+type State struct {
+	currentView uint
+	textInput   string
 
-type Book struct {
-	isbn        string
-	title       string
-	currentPage uint
-	status      string
+	// Booksshelf state
+	books []Book
+
+	cursiveFont  rl.Font
+	textFont     rl.Font
+	isbnResponse ISBNResponse
+}
+
+var state = State{
+	currentView: HOME,
+	books:       []Book{},
 }
 
 type ISBNResponse struct {
@@ -112,75 +115,42 @@ func main2() {
 	fmt.Println("Inserted a book 'edde' into the Books table successfully!")
 }
 
-const Width = 1280
-const Height = 720
-
 func main() {
-	rl.InitWindow(Width, Height, "Klaras Bok Valv")
+	err := initDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer closeDB()
+
+	rl.InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Klaras Bok Valv")
 	defer rl.CloseWindow()
 
 	rl.SetTargetFPS(60)
 
 	// var button bool
 
-	fontTtf := rl.LoadFont("fonts/Meditative.ttf")
-	welcomeMsg := "Klaras Bok Valv"
-	msgPosition := rl.Vector2{}
-	scale := float32(fontTtf.BaseSize)
-	msgPosition.X = float32(Width)/2 - rl.MeasureTextEx(fontTtf, welcomeMsg, scale, 0).X/2
-	msgPosition.Y = float32(Height)/2 - rl.MeasureTextEx(fontTtf, welcomeMsg, scale, 0).X/2
+	state.cursiveFont = rl.LoadFontEx("fonts/Meditative.ttf", 128, nil, 0)
+	state.textFont = rl.LoadFontEx("fonts/Virgil.ttf", 512, nil, 0)
+	defer rl.UnloadFont(state.cursiveFont)
+	defer rl.UnloadFont(state.textFont)
 
-	textInput := ""
-
-	var button bool
-	buttonWidth := float32(120)
-	buttonHeight := float32(60)
-	buttonX := float32(Width)/2 - buttonWidth/2
-	buttonY := float32(Height)/2 - buttonHeight/2 + 120
-
-	var isbnResponse ISBNResponse
-	isbnPosition := rl.Vector2{}
+	gui.SetStyle(gui.DEFAULT, gui.TEXT_SIZE, int64(H2))
+	rl.SetTextureFilter(state.textFont.Texture, rl.FilterPoint)
+	gui.SetFont(state.textFont)
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
 
 		rl.ClearBackground(rl.Beige)
 
-		key := rl.GetCharPressed()
-		for {
-			if key <= 0 {
-				break
-			}
-
-			if key > 0 {
-				if key >= 32 && key <= 125 {
-					textInput += string(rune(key))
-				}
-			}
-
-			key = rl.GetCharPressed()
+		switch state.currentView {
+		case HOME:
+			homeView()
+		case BOOK_SHELF:
+			bookShelfView()
+		case ADD_BOOK:
+			addBookView()
 		}
-
-		if rl.IsKeyPressed(rl.KeyBackspace) && len(textInput) != 0 {
-			textInput = textInput[0 : len(textInput)-1]
-		}
-
-		button = gui.Button(rl.NewRectangle(buttonX, buttonY, buttonWidth, buttonHeight), "Search")
-		if button {
-			go func() {
-				isbnResponse = LookupBookFromISBN(textInput)
-				isbnPosition.X = float32(Width)/2 - rl.MeasureTextEx(fontTtf, isbnResponse.title, scale, 0).X/2
-				isbnPosition.Y = msgPosition.Y + 130
-			}()
-		}
-
-		rl.DrawTextEx(fontTtf, "Klaras Bok Valv", msgPosition, scale, 0, rl.Black)
-		rl.DrawTextEx(fontTtf, isbnResponse.title, isbnPosition, scale, 0, rl.White)
-
-		inputPosition := rl.Vector2{}
-		inputPosition.X = float32(Width)/2 - rl.MeasureTextEx(fontTtf, textInput, scale, 0).X/2
-		inputPosition.Y = float32(Height)/2 - rl.MeasureTextEx(fontTtf, textInput, scale, 0).Y/2
-		rl.DrawTextEx(fontTtf, textInput, inputPosition, scale, 0, rl.White)
 
 		rl.EndDrawing()
 	}
