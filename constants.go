@@ -1,5 +1,7 @@
 package main
 
+import rl "github.com/gen2brain/raylib-go/raylib"
+
 // Database definitions
 const DBName = "./library.db"
 const ISBNurl = "http://openlibrary.org/api/books?bibkeys=ISBN:%v&jscmd=details&format=json"
@@ -28,6 +30,10 @@ const (
 	BOOK_SHELF
 	ADD_BOOK
 )
+
+var BackgroundColor = rl.Beige
+
+const TransitionDuration = 1.0
 
 // Queries
 const fuzzySearchBookQuery = `

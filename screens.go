@@ -132,12 +132,19 @@ func changeView(view uint) {
 		return
 	}
 
+	// Some side effects of changing view
 	if view == BOOK_SHELF {
 		state.textInput = ""
 		updateBookShelfView()
 	} else if view == HOME {
 		state.textInput = ""
 	}
+
+	// Initiate transition
+	state.fromView = state.currentView
+	state.toView = view
+	state.transitioning = true
+	state.t = 0
 
 	state.currentView = view
 }

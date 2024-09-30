@@ -25,11 +25,24 @@ type State struct {
 	cursiveFont  rl.Font
 	textFont     rl.Font
 	isbnResponse ISBNResponse
+
+	// Transition state
+	transitioning    bool
+	t                float32
+	transitionShader rl.Shader
+	fromTexture      rl.RenderTexture2D
+	toTexture        rl.RenderTexture2D
+	fromView         uint
+	toView           uint
 }
 
 var state = State{
-	currentView: HOME,
-	books:       []Book{},
+	currentView:   HOME,
+	books:         []Book{},
+	transitioning: false,
+	t:             0,
+	fromView:      HOME,
+	toView:        HOME,
 }
 
 type ISBNResponse struct {
@@ -138,20 +151,74 @@ func main() {
 	rl.SetTextureFilter(state.textFont.Texture, rl.FilterPoint)
 	gui.SetFont(state.textFont)
 
+	// Setup the transition data
+	state.fromTexture = rl.LoadRenderTexture(WINDOW_WIDTH, WINDOW_HEIGHT)
+	state.toTexture = rl.LoadRenderTexture(WINDOW_WIDTH, WINDOW_HEIGHT)
+	defer rl.UnloadRenderTexture(state.fromTexture)
+	defer rl.UnloadRenderTexture(state.toTexture)
+
+	state.transitionShader = rl.LoadShader("", "shaders/transition.fs") // use default vertex shader
+	defer rl.UnloadShader(state.transitionShader)
+
+	tLoc := rl.GetShaderLocation(state.transitionShader, "t")
+	fromTextureLoc := rl.GetShaderLocation(state.transitionShader, "from")
+	toTextureLoc := rl.GetShaderLocation(state.transitionShader, "to")
+
+	// Set shader uniforms that won't change
+	rl.SetShaderValue(state.transitionShader, fromTextureLoc, []float32{0}, rl.ShaderUniformSampler2d)
+	rl.SetShaderValue(state.transitionShader, toTextureLoc, []float32{1}, rl.ShaderUniformSampler2d)
+
 	for !rl.WindowShouldClose() {
-		rl.BeginDrawing()
+		if !state.transitioning {
+			rl.BeginDrawing()
+			rl.ClearBackground(BackgroundColor)
+			drawView(state.currentView)
+			rl.EndDrawing()
+		} else {
+			// Draw the 'from' texture
+			rl.BeginTextureMode(state.fromTexture)
+			rl.ClearBackground(BackgroundColor)
+			drawView(state.fromView)
+			rl.EndTextureMode()
 
-		rl.ClearBackground(rl.Beige)
+			// Draw the 'to' texture
+			rl.BeginTextureMode(state.toTexture)
+			rl.ClearBackground(BackgroundColor)
+			drawView(state.toView)
+			rl.EndTextureMode()
 
-		switch state.currentView {
-		case HOME:
-			homeView()
-		case BOOK_SHELF:
-			bookShelfView()
-		case ADD_BOOK:
-			addBookView()
+			// Draw the transition, using 'from' and 'to' textures + transition shader
+			rl.BeginDrawing()
+			rl.ClearBackground(rl.Black)
+			rl.BeginShaderMode(state.transitionShader)
+
+			rl.SetShaderValue(state.transitionShader, tLoc, []float32{state.t}, rl.ShaderUniformFloat)
+			// Bind textures to texture units
+			rl.SetShaderValueTexture(state.transitionShader, fromTextureLoc, state.fromTexture.Texture)
+			rl.SetShaderValueTexture(state.transitionShader, toTextureLoc, state.toTexture.Texture)
+
+			// Draw a full-screen quad to apply the shader
+			rl.DrawRectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, rl.White)
+
+			rl.EndShaderMode()
+			rl.EndDrawing()
+
+			state.t += rl.GetFrameTime() / TransitionDuration
+			if state.t >= 1.0 {
+				state.t = 1.0
+				state.transitioning = false
+			}
 		}
+	}
+}
 
-		rl.EndDrawing()
+func drawView(view uint) {
+	switch view {
+	case HOME:
+		homeView()
+	case BOOK_SHELF:
+		bookShelfView()
+	case ADD_BOOK:
+		addBookView()
 	}
 }
