@@ -84,7 +84,7 @@ func FuzzySearchBooks(books []Book, search string) []Book {
 	return books
 }
 
-func main2() {
+func _() {
 	fmt.Println("Library Init")
 
 	isbnResponse := LookupBookFromISBN("9780060598242")
@@ -161,12 +161,7 @@ func main() {
 	defer rl.UnloadShader(state.transitionShader)
 
 	tLoc := rl.GetShaderLocation(state.transitionShader, "t")
-	fromTextureLoc := rl.GetShaderLocation(state.transitionShader, "from")
-	toTextureLoc := rl.GetShaderLocation(state.transitionShader, "to")
-
-	// Set shader uniforms that won't change
-	rl.SetShaderValue(state.transitionShader, fromTextureLoc, []float32{0}, rl.ShaderUniformSampler2d)
-	rl.SetShaderValue(state.transitionShader, toTextureLoc, []float32{1}, rl.ShaderUniformSampler2d)
+	toTextureLoc := rl.GetShaderLocation(state.transitionShader, "texture1")
 
 	for !rl.WindowShouldClose() {
 		if !state.transitioning {
@@ -175,12 +170,6 @@ func main() {
 			drawView(state.currentView)
 			rl.EndDrawing()
 		} else {
-			// Draw the 'from' texture
-			rl.BeginTextureMode(state.fromTexture)
-			rl.ClearBackground(BackgroundColor)
-			drawView(state.fromView)
-			rl.EndTextureMode()
-
 			// Draw the 'to' texture
 			rl.BeginTextureMode(state.toTexture)
 			rl.ClearBackground(BackgroundColor)
@@ -189,16 +178,12 @@ func main() {
 
 			// Draw the transition, using 'from' and 'to' textures + transition shader
 			rl.BeginDrawing()
-			rl.ClearBackground(rl.Black)
+			rl.ClearBackground(BackgroundColor)
 			rl.BeginShaderMode(state.transitionShader)
 
 			rl.SetShaderValue(state.transitionShader, tLoc, []float32{state.t}, rl.ShaderUniformFloat)
-			// Bind textures to texture units
-			rl.SetShaderValueTexture(state.transitionShader, fromTextureLoc, state.fromTexture.Texture)
 			rl.SetShaderValueTexture(state.transitionShader, toTextureLoc, state.toTexture.Texture)
-
-			// Draw a full-screen quad to apply the shader
-			rl.DrawRectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, rl.White)
+			rl.DrawTexturePro(state.fromTexture.Texture, rl.NewRectangle(0, 0, float32(state.fromTexture.Texture.Width), float32(-state.fromTexture.Texture.Height)), rl.NewRectangle(0, 0, float32(WINDOW_WIDTH), float32(WINDOW_HEIGHT)), rl.NewVector2(0, 0), 0, rl.White)
 
 			rl.EndShaderMode()
 			rl.EndDrawing()

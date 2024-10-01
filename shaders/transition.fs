@@ -2,11 +2,10 @@
 
 // Input vertex attributes (from vertex shader)
 in vec2 fragTexCoord;
-in vec4 fragColor;
 
 // Input uniform values
-uniform sampler2D from;
-uniform sampler2D to;
+uniform sampler2D texture0;
+uniform sampler2D texture1;
 uniform float t;
 
 // Output fragment color
@@ -14,8 +13,8 @@ out vec4 finalColor;
 
 void main() {
   // Get the pixel color from both textures
-  vec4 fromCol = texture(from, fragTexCoord);
-  vec4 toCol = texture(to, fragTexCoord);
+  vec4 fromCol = texture(texture0, fragTexCoord);
+  vec4 toCol = texture(texture1, fragTexCoord);
 
   // Perform linear interpolation between the two colors
   finalColor = mix(fromCol, toCol, t);
