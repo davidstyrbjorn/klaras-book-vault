@@ -176,21 +176,25 @@ func main() {
 			drawView(state.toView)
 			rl.EndTextureMode()
 
+			rl.BeginTextureMode(state.fromTexture)
+			rl.ClearBackground(BackgroundColor)
+			drawView(state.fromView)
+			rl.EndTextureMode()
+
 			// Draw the transition, using 'from' and 'to' textures + transition shader
 			rl.BeginDrawing()
 			rl.ClearBackground(BackgroundColor)
 			rl.BeginShaderMode(state.transitionShader)
 
-			rl.SetShaderValue(state.transitionShader, tLoc, []float32{state.t}, rl.ShaderUniformFloat)
+			rl.SetShaderValue(state.transitionShader, tLoc, []float32{state.t / TransitionDuration}, rl.ShaderUniformFloat)
 			rl.SetShaderValueTexture(state.transitionShader, toTextureLoc, state.toTexture.Texture)
 			rl.DrawTexturePro(state.fromTexture.Texture, rl.NewRectangle(0, 0, float32(state.fromTexture.Texture.Width), float32(-state.fromTexture.Texture.Height)), rl.NewRectangle(0, 0, float32(WINDOW_WIDTH), float32(WINDOW_HEIGHT)), rl.NewVector2(0, 0), 0, rl.White)
 
 			rl.EndShaderMode()
 			rl.EndDrawing()
 
-			state.t += rl.GetFrameTime() / TransitionDuration
-			if state.t >= 1.0 {
-				state.t = 1.0
+			state.t += rl.GetFrameTime()
+			if state.t >= TransitionDuration {
 				state.transitioning = false
 			}
 		}

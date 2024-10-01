@@ -146,6 +146,14 @@ func changeView(view uint) {
 	state.transitioning = true
 	state.t = 0
 
+	// Set the transition type
+	transitionTypeLoc := rl.GetShaderLocation(state.transitionShader, "transitionType")
+	if state.fromView == HOME && state.toView == BOOK_SHELF {
+		rl.SetShaderValue(state.transitionShader, transitionTypeLoc, []float32{0}, rl.ShaderUniformFloat)
+	} else if state.fromView == BOOK_SHELF && state.toView == HOME {
+		rl.SetShaderValue(state.transitionShader, transitionTypeLoc, []float32{1}, rl.ShaderUniformFloat)
+	}
+
 	state.currentView = view
 }
 

@@ -33,7 +33,7 @@ const (
 
 var BackgroundColor = rl.Beige
 
-const TransitionDuration = 1.0
+const TransitionDuration = 0.35
 
 // Queries
 const fuzzySearchBookQuery = `
