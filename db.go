@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"time"
 )
 
 // The book as it is represented in the application layer
@@ -21,12 +22,15 @@ type DBState struct {
 	db             *sql.DB
 	createBookStmt *sql.Stmt
 	readBookStmt   *sql.Stmt
+
+	performRead chan (bool)
 }
 
 var dbState = DBState{
 	db:             nil,
 	createBookStmt: nil,
 	readBookStmt:   nil,
+	performRead:    make(chan bool),
 }
 
 func initDB() error {
@@ -149,3 +153,20 @@ func insert10Books() {
 // func updateBook() {}
 
 // func deleteBook() {}
+
+func dbRoutine() {
+	for {
+		select {
+		case <-dbState.performRead:
+			books, err := readAllBooks()
+			if err != nil {
+				panic(err)
+			}
+			state.books = books
+		default:
+			// default case to prevent blocking
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+}

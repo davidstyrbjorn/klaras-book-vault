@@ -11,19 +11,6 @@ const (
 	LOANED_OUT = "loaned out"
 )
 
-// Font definitions
-const (
-	H1 = 48
-	H2 = 24
-	H3 = 18
-)
-
-// Window definitions
-const (
-	WINDOW_WIDTH  = 800
-	WINDOW_HEIGHT = 600
-)
-
 // View definition
 const (
 	HOME = uint(iota)

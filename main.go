@@ -9,41 +9,9 @@ import (
 	"database/sql"
 	"net/http"
 
-	gui "github.com/gen2brain/raylib-go/raygui"
-	rl "github.com/gen2brain/raylib-go/raylib"
+	g "github.com/AllenDang/giu"
 	_ "github.com/mattn/go-sqlite3"
 )
-
-// State definition & decleration
-type State struct {
-	currentView uint
-	textInput   string
-
-	// Booksshelf state
-	books []Book
-
-	cursiveFont  rl.Font
-	textFont     rl.Font
-	isbnResponse ISBNResponse
-
-	// Transition state
-	transitioning    bool
-	t                float32
-	transitionShader rl.Shader
-	fromTexture      rl.RenderTexture2D
-	toTexture        rl.RenderTexture2D
-	fromView         uint
-	toView           uint
-}
-
-var state = State{
-	currentView:   HOME,
-	books:         []Book{},
-	transitioning: false,
-	t:             0,
-	fromView:      HOME,
-	toView:        HOME,
-}
 
 type ISBNResponse struct {
 	title string
@@ -128,6 +96,36 @@ func _() {
 	fmt.Println("Inserted a book 'edde' into the Books table successfully!")
 }
 
+func loop() {
+	g.SingleWindow().Layout(
+		g.Align(g.AlignCenter).To(g.Label("Klaras Bok Valv")),
+		g.Spacing(), g.Spacing(), g.Spacing(),
+
+		g.Align(g.AlignCenter).To(g.Row(
+			g.Button("Lägg till bok").OnClick(func() {
+				state.addBookOpen = true
+			}),
+			g.Button("Bokhylla").OnClick(func() {
+				state.bokhyllaOpen = true
+			}),
+		)),
+
+		g.Spacing(), g.Spacing(), g.Spacing(),
+		g.Spacing(), g.Spacing(), g.Spacing(),
+		g.Spacing(), g.Spacing(), g.Spacing(),
+
+		g.Align(g.AlignCenter).To(g.Label("Lägg till bok - Skanna ISBN på en bok och klicka på lägg till")),
+		g.Align(g.AlignCenter).To(g.Label("Bokhylla - Här visas alla böcker, som du skannat in")),
+
+		g.Button("Lägg till 10 böcker").OnClick(func() {
+			insert10Books()
+		}),
+	)
+
+	windowAddBook()
+	windowBokhylla()
+}
+
 func main() {
 	err := initDB()
 	if err != nil {
@@ -135,79 +133,8 @@ func main() {
 	}
 	defer closeDB()
 
-	rl.InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Klaras Bok Valv")
-	defer rl.CloseWindow()
+	go dbRoutine()
 
-	rl.SetTargetFPS(60)
-
-	// var button bool
-
-	state.cursiveFont = rl.LoadFontEx("fonts/Meditative.ttf", 128, nil, 0)
-	state.textFont = rl.LoadFontEx("fonts/Virgil.ttf", 512, nil, 0)
-	defer rl.UnloadFont(state.cursiveFont)
-	defer rl.UnloadFont(state.textFont)
-
-	gui.SetStyle(gui.DEFAULT, gui.TEXT_SIZE, int64(H2))
-	rl.SetTextureFilter(state.textFont.Texture, rl.FilterPoint)
-	gui.SetFont(state.textFont)
-
-	// Setup the transition data
-	state.fromTexture = rl.LoadRenderTexture(WINDOW_WIDTH, WINDOW_HEIGHT)
-	state.toTexture = rl.LoadRenderTexture(WINDOW_WIDTH, WINDOW_HEIGHT)
-	defer rl.UnloadRenderTexture(state.fromTexture)
-	defer rl.UnloadRenderTexture(state.toTexture)
-
-	state.transitionShader = rl.LoadShader("", "shaders/transition.fs") // use default vertex shader
-	defer rl.UnloadShader(state.transitionShader)
-
-	tLoc := rl.GetShaderLocation(state.transitionShader, "t")
-	toTextureLoc := rl.GetShaderLocation(state.transitionShader, "texture1")
-
-	for !rl.WindowShouldClose() {
-		if !state.transitioning {
-			rl.BeginDrawing()
-			rl.ClearBackground(BackgroundColor)
-			drawView(state.currentView)
-			rl.EndDrawing()
-		} else {
-			// Draw the 'to' texture
-			rl.BeginTextureMode(state.toTexture)
-			rl.ClearBackground(BackgroundColor)
-			drawView(state.toView)
-			rl.EndTextureMode()
-
-			rl.BeginTextureMode(state.fromTexture)
-			rl.ClearBackground(BackgroundColor)
-			drawView(state.fromView)
-			rl.EndTextureMode()
-
-			// Draw the transition, using 'from' and 'to' textures + transition shader
-			rl.BeginDrawing()
-			rl.ClearBackground(BackgroundColor)
-			rl.BeginShaderMode(state.transitionShader)
-
-			rl.SetShaderValue(state.transitionShader, tLoc, []float32{state.t / TransitionDuration}, rl.ShaderUniformFloat)
-			rl.SetShaderValueTexture(state.transitionShader, toTextureLoc, state.toTexture.Texture)
-			rl.DrawTexturePro(state.fromTexture.Texture, rl.NewRectangle(0, 0, float32(state.fromTexture.Texture.Width), float32(-state.fromTexture.Texture.Height)), rl.NewRectangle(0, 0, float32(WINDOW_WIDTH), float32(WINDOW_HEIGHT)), rl.NewVector2(0, 0), 0, rl.White)
-
-			rl.EndShaderMode()
-			rl.EndDrawing()
-
-			state.t += rl.GetFrameTime()
-			if state.t >= TransitionDuration {
-				state.transitioning = false
-			}
-		}
-	}
-}
-
-func drawView(view uint) {
-	switch view {
-	case HOME:
-		homeView()
-	case BOOK_SHELF:
-		bookShelfView()
-	case ADD_BOOK:
-		addBookView()
-	}
+	w := g.NewMasterWindow("Library", 500, 300, g.MasterWindowFlagsNotResizable)
+	w.Run(loop)
 }
