@@ -7,14 +7,20 @@ type State struct {
 
 	isbnInput string
 
-	addBookOpen  bool
-	bokhyllaOpen bool
+	currentView uint
 }
 
 var state = State{
 	books:        []Book{},
 	isbnResponse: ISBNResponse{title: ""},
-	addBookOpen:  false,
-	bokhyllaOpen: false,
 	isbnInput:    "",
+	currentView:  HOME,
+}
+
+func switchView(newView uint) {
+	// oldView := state.currentView
+	if newView == BOOK_SHELF {
+		dbState.performRead <- true
+	}
+	state.currentView = newView
 }

@@ -96,34 +96,22 @@ func _() {
 	fmt.Println("Inserted a book 'edde' into the Books table successfully!")
 }
 
+func viewReducer() []g.Widget {
+	switch state.currentView {
+	case HOME:
+		return homeView()
+	case ADD_BOOK:
+		return addBookView()
+	case BOOK_SHELF:
+		return bookshelfView()
+	}
+
+	fmt.Println("Program is in an unknown view")
+	return []g.Widget{}
+}
+
 func loop() {
-	g.SingleWindow().Layout(
-		g.Align(g.AlignCenter).To(g.Label("Klaras Bok Valv")),
-		g.Spacing(), g.Spacing(), g.Spacing(),
-
-		g.Align(g.AlignCenter).To(g.Row(
-			g.Button("Lägg till bok").OnClick(func() {
-				state.addBookOpen = true
-			}),
-			g.Button("Bokhylla").OnClick(func() {
-				state.bokhyllaOpen = true
-			}),
-		)),
-
-		g.Spacing(), g.Spacing(), g.Spacing(),
-		g.Spacing(), g.Spacing(), g.Spacing(),
-		g.Spacing(), g.Spacing(), g.Spacing(),
-
-		g.Align(g.AlignCenter).To(g.Label("Lägg till bok - Skanna ISBN på en bok och klicka på lägg till")),
-		g.Align(g.AlignCenter).To(g.Label("Bokhylla - Här visas alla böcker, som du skannat in")),
-
-		g.Button("Lägg till 10 böcker").OnClick(func() {
-			insert10Books()
-		}),
-	)
-
-	windowAddBook()
-	windowBokhylla()
+	g.SingleWindow().Layout(viewReducer()...)
 }
 
 func main() {
@@ -135,6 +123,6 @@ func main() {
 
 	go dbRoutine()
 
-	w := g.NewMasterWindow("Library", 500, 300, g.MasterWindowFlagsNotResizable)
+	w := g.NewMasterWindow("Library", 800, 600, g.MasterWindowFlagsNotResizable)
 	w.Run(loop)
 }

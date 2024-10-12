@@ -16,15 +16,16 @@ func buildBokhylla() []*g.TableRowWidget {
 	return rows
 }
 
-func windowBokhylla() {
-	if !state.bokhyllaOpen {
-		return
-	}
-
-	g.Window("Bokhylla").Size(500, 300).IsOpen(&state.bokhyllaOpen).Layout(
-		g.Button("Ladda Bokhylla").OnClick(func() {
-			dbState.performRead <- true
-		}),
+func bookshelfView() []g.Widget {
+	return []g.Widget{
+		g.Row(
+			g.Button("Tillbaka").OnClick(func() {
+				switchView(HOME)
+			}),
+			g.Button("Ladda Bokhylla").OnClick(func() {
+				dbState.performRead <- true
+			}),
+		),
 		g.Table().Rows(buildBokhylla()...),
-	)
+	}
 }
