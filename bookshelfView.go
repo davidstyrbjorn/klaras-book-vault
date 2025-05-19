@@ -22,7 +22,8 @@ func buildBokhylla() []*g.TableRowWidget {
 		g.Label("Titel"),
 		g.Label("Författare"),
 		g.Label("Betyg"),
-		g.Label("Anteckning"),
+		g.Label("Utlånad?"),
+		g.Label("Utläst?"),
 	)
 
 	for i, book := range state.books {
@@ -34,7 +35,8 @@ func buildBokhylla() []*g.TableRowWidget {
 			g.Label(book.Title),
 			g.Label(book.Author),
 			g.Label(starsToString(book.Stars)),
-			g.Label(book.Note),
+			g.Condition(book.Loaned, g.Label("Utlånad"), g.Label("Hemma")),
+			g.Condition(book.Read, g.Label("Utläst"), g.Label("TBR")),
 		)
 	}
 

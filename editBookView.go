@@ -65,12 +65,37 @@ func editBookView() []g.Widget {
 					clipboard.Set(state.bookToEdit.ISBN)
 				}),
 			),
-			g.InputText(&state.bookToEdit.Title).Hint("Titel"),
-			g.InputText(&state.bookToEdit.Author).Hint("Författare"),
-			g.InputText(&state.bookToEdit.Note).Hint("Egen Notering"),
+			g.Spacing(),
+			g.Separator(),
+			g.Spacing(),
+			g.Column(
+				g.Label("Titel"),
+				g.InputText(&state.bookToEdit.Title).Hint("Titel"),
+			),
+			g.Spacing(),
+			g.Column(
+				g.Label("Författare"),
+				g.InputText(&state.bookToEdit.Author).Hint(state.placeholderAuthor),
+			),
+			g.Spacing(),
+			g.Column(
+				g.Label("Notering"),
+				g.InputTextMultiline(&state.bookToEdit.Note),
+			),
+			g.Spacing(),
+			g.Column(
+				g.Label("Betyg (1-5)"),
+				g.InputInt(&state.bookToEdit.Stars).OnChange(func() {
+					if state.bookToEdit.Stars > 5 {
+						state.bookToEdit.Stars = 5
+					} else if state.bookToEdit.Stars < 0 {
+						state.bookToEdit.Stars = 0
+					}
+				}),
+			),
+			g.Spacing(),
 			g.Checkbox("Utlånad?", &state.bookToEdit.Loaned),
 			g.Checkbox("Utläst?", &state.bookToEdit.Read),
-			g.InputInt(&state.bookToEdit.Stars),
 			g.Row(
 				g.Button("Spara").OnClick(func() {
 					saveEditedBook()

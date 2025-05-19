@@ -1,6 +1,10 @@
 package main
 
-import g "github.com/AllenDang/giu"
+import (
+	"math/rand"
+
+	g "github.com/AllenDang/giu"
+)
 
 const (
 	VIEW_HOME = iota
@@ -28,8 +32,9 @@ type ISBNResponse struct {
 type State struct {
 	currentView int
 
-	books      []Book
-	bookToEdit Book
+	books             []Book
+	bookToEdit        Book
+	placeholderAuthor string
 
 	bookAlreadyExists bool
 	isbnInput         string
@@ -51,11 +56,28 @@ func resetAddBookState() {
 	state.isbnResponse.title = ""
 }
 
+func pickRandomPlaceholderAuthor() {
+	x := rand.Intn(100)
+	if x <= 25 {
+		state.placeholderAuthor = "Anders Andersson"
+	} else if x <= 50 {
+		state.placeholderAuthor = "Klara Klarasson"
+	} else if x <= 75 {
+		state.placeholderAuthor = "Erik Eriksson"
+	} else {
+		state.placeholderAuthor = "Sara Sarasson"
+	}
+}
+
 func changeView(to int) {
 	// oldView := state.currentView
 
 	if to == VIEW_ADD_BOOK {
 		resetAddBookState()
+	}
+
+	if to == VIEW_EDIT_BOOK {
+		pickRandomPlaceholderAuthor()
 	}
 
 	state.currentView = to
