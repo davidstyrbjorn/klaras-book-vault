@@ -13,16 +13,16 @@ func LookupBookFromISBN(isbn string) (ISBNResponse, error) {
 
 	resp, err := http.Get(fmt.Sprintf(ISBNurl, isbn))
 	if err != nil {
-		return isbnResponse, fmt.Errorf("Failed to perform GET request")
+		return isbnResponse, fmt.Errorf("failed to perform GET request")
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return isbnResponse, fmt.Errorf("Kunde inte hitta bok")
+		return isbnResponse, fmt.Errorf("kunde inte hitta bok")
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return isbnResponse, fmt.Errorf("Failed to read response body")
+		return isbnResponse, fmt.Errorf("failed to read response body")
 	}
 
 	stringResult := string(body)
@@ -30,7 +30,12 @@ func LookupBookFromISBN(isbn string) (ISBNResponse, error) {
 	var data map[string]interface{}
 	err = json.Unmarshal([]byte(stringResult), &data)
 	if err != nil {
-		return isbnResponse, fmt.Errorf("Failed to unmarshal json response1")
+		return isbnResponse, fmt.Errorf("failed to unmarshal json response, kontakta utvecklare och get isbn numret du försökte använda")
+	}
+
+	// If we got a zero map back, we have a bad ISBN number
+	if len(data) == 0 {
+		return isbnResponse, fmt.Errorf("isbn '%v' gav inget resultat tyvärr", isbn)
 	}
 
 	for _, v := range data {

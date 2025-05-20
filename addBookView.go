@@ -1,41 +1,76 @@
 package main
 
 import (
-	"fmt"
+	"unicode"
 
 	g "github.com/AllenDang/giu"
 )
 
+func verifyIsbnString(isbn string) (bool, string) {
+	result := ""
+	// Strip isbn of any hyphens first thing
+	for _, char := range state.isbnInput {
+		if unicode.IsDigit(char) {
+			result += string(char)
+		}
+	}
+	isbn = result
+
+	length := len(isbn)
+	if length != 10 && length != 13 {
+		return false, isbn
+	}
+
+	for _, char := range isbn {
+		if !unicode.IsDigit(char) {
+			return false, isbn
+		}
+	}
+
+	return true, isbn
+}
+
 func onAddBookClick() {
+	state.isbnLoading = true
+	defer func() {
+		state.isbnLoading = false
+		g.Update()
+		state.isbnInput = ""
+	}()
+	g.Update()
 
 	if state.isbnInput == "" {
-		state.isbnError = fmt.Errorf("var snäll fyll i ett ISBN nummer tack")
+		state.isbnError = "Var snäll fyll i ett ISBN nummer"
 		return
 	}
 
+	// Verify isbn string, also returns a pure isbn version in case it contains any extra technically allowed characters
+	correct, newIsbn := verifyIsbnString(state.isbnInput)
+	if !correct {
+		state.isbnError = "Inte ett giltigt ISBN nummer"
+		return
+	}
+	state.isbnInput = newIsbn
+
 	isbnResponse, err := LookupBookFromISBN(state.isbnInput)
 	if err != nil {
-		state.isbnError = err
+		state.isbnError = err.Error()
 		return
 	}
 
 	state.isbnResponse = isbnResponse
-	state.bookAlreadyExists = false
 
 	for i := range state.books {
 		if state.books[i].ISBN == state.isbnInput {
-			state.bookAlreadyExists = true
+			state.isbnError = "Du har redan en bok med detta isbn nummer!"
+			return
 		}
 	}
 
-	// If we have no books with this ISBN, we can just insert it and be done
-	if !state.bookAlreadyExists {
-		state.books = append(state.books, Book{Title: state.isbnResponse.title, ISBN: state.isbnResponse.isbn})
-		go DumpBookToFile()
-	}
-
-	state.isbnInput = ""
-	g.Update()
+	// If we get to here, insert the book, dump into binary and set that we have no error!
+	state.books = append(state.books, Book{Title: state.isbnResponse.title, ISBN: state.isbnResponse.isbn})
+	state.isbnError = "" // No error to show if we got to here!
+	go DumpBookToFile()
 }
 
 func addBookView() []g.Widget {
@@ -47,17 +82,16 @@ func addBookView() []g.Widget {
 				go onAddBookClick()
 			}),
 			g.Separator(),
-			g.Label("Resultat"),
-			// g.Condition(state.isbnError != nil, g.Labelf("Error = %v", state.isbnError.Error()), nil),
-			g.Condition(state.isbnResponse.title != "" && state.isbnError == nil, g.Labelf("Titel = %v", state.isbnResponse.title), nil),
-			g.Condition(state.isbnResponse.title != "" && state.isbnError == nil, g.Labelf("ISBN = %v", state.isbnResponse.isbn), nil),
-			g.Condition(state.isbnResponse.title != "" && state.isbnError == nil && !state.bookAlreadyExists,
-				g.Style().SetColor(g.StyleColorText, SuccessGreen).To(g.Label("Boken tillagd")),
-				g.Label(""),
+			g.Label("Hittad bok!"),
+			g.Condition(state.isbnError != "",
+				g.Style().SetColor(g.StyleColorText, FailedRed).To(g.Labelf("%v", state.isbnError)),
+				nil,
 			),
-			g.Condition(state.isbnResponse.title != "" && state.isbnError == nil && state.bookAlreadyExists,
-				g.Style().SetColor(g.StyleColorText, FailedRed).To(g.Label("Du har redan denna bok tillagd")),
-				g.Label(""),
+			g.Condition(state.isbnResponse.title != "" && state.isbnError == "", g.Labelf("Titel = %v", state.isbnResponse.title), nil),
+			g.Condition(state.isbnResponse.title != "" && state.isbnError == "", g.Labelf("ISBN = %v", state.isbnResponse.isbn), nil),
+			g.Condition(state.isbnResponse.title != "" && state.isbnError == "",
+				g.Style().SetColor(g.StyleColorText, SuccessGreen).To(g.Label("Boken tillagd")),
+				nil,
 			),
 		)),
 	}
