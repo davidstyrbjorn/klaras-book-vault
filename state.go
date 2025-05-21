@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"time"
 
 	g "github.com/AllenDang/giu"
 )
@@ -26,8 +27,9 @@ type Book struct {
 }
 
 type ISBNResponse struct {
-	title string
-	isbn  string
+	title  string
+	Author string
+	isbn   string
 }
 
 type State struct {
@@ -38,20 +40,24 @@ type State struct {
 	bookToEdit        Book
 	placeholderAuthor string
 
-	isbnInput    string
-	isbnResponse ISBNResponse
-	isbnError    string
-	isbnLoading  bool
+	isbnInput         string
+	isbnResponse      ISBNResponse
+	isbnError         string
+	isbnLoading       bool
+	manualInputTitle  string
+	manualInputAuthor string
+	isbnSearchTimer   *time.Timer
 }
 
 var state = State{
-	currentView:  VIEW_HOME,
-	books:        []Book{}, // Loaded from DB and kept in memory
-	isbnResponse: ISBNResponse{title: ""},
-	isbnInput:    "",
-	isbnError:    "",
-	searchString: "",
-	isbnLoading:  false,
+	currentView:     VIEW_HOME,
+	books:           []Book{}, // Loaded from DB and kept in memory
+	isbnResponse:    ISBNResponse{title: ""},
+	isbnInput:       "",
+	isbnError:       "",
+	searchString:    "",
+	isbnLoading:     false,
+	isbnSearchTimer: nil,
 }
 
 func resetAddBookState() {
@@ -60,6 +66,7 @@ func resetAddBookState() {
 	state.isbnError = ""
 	state.isbnResponse.title = ""
 	state.isbnLoading = false
+	state.isbnSearchTimer = nil
 }
 
 func pickRandomPlaceholderAuthor() {

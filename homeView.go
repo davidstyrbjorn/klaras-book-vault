@@ -9,7 +9,7 @@ func homeView() []g.Widget {
 		g.Align(g.AlignCenter).To(g.Label("Klaras Bok Valv")),
 		g.Spacing(), g.Spacing(), g.Spacing(),
 
-		g.Align(g.AlignCenter).To(g.Row(
+		g.Column(g.Align(g.AlignCenter).To(
 			g.Button("Lägg till bok").OnClick(func() {
 				changeView(VIEW_ADD_BOOK)
 			}),

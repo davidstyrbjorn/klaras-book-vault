@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 // ISBN related functions, mainly the one that takes a ISBN code and returns a response
@@ -41,7 +42,19 @@ func LookupBookFromISBN(isbn string) (ISBNResponse, error) {
 	for _, v := range data {
 		details := v.(map[string]interface{})["details"].(map[string]interface{})
 		isbnResponse.title = details["title"].(string)
-		// TODO, parse out the rest of the stuff
+
+		authors := []string{}
+		if details["authors"] != nil {
+			for _, author := range details["authors"].([]interface{}) {
+				authorString := author.(map[string]interface{})["name"].(string)
+				authors = append(authors, authorString)
+			}
+		}
+		if len(authors) == 1 {
+			isbnResponse.Author = authors[0]
+		} else if len(authors) > 1 {
+			isbnResponse.Author = strings.Join(authors, ", ")
+		}
 	}
 
 	isbnResponse.isbn = isbn

@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/AllenDang/giu"
 	g "github.com/AllenDang/giu"
-	clipboard "github.com/d-tsuji/clipboard"
 )
 
 func saveEditedBook() {
@@ -61,9 +60,6 @@ func editBookView() []g.Widget {
 			g.Label("Editera din bok"),
 			g.Row(
 				g.Labelf("ISBN = %v", state.bookToEdit.ISBN),
-				g.Button("Kopiera ISBN").OnClick(func() {
-					clipboard.Set(state.bookToEdit.ISBN)
-				}),
 			),
 			g.Spacing(),
 			g.Separator(),

@@ -8,7 +8,6 @@ require (
 	github.com/AllenDang/giu v0.9.0 // indirect
 	github.com/AllenDang/go-findfont v0.0.0-20200702051237-9f180485aeb8 // indirect
 	github.com/BurntSushi/xgb v0.0.0-20200324125942-20f126ea2843 // indirect
-	github.com/d-tsuji/clipboard v0.0.3 // indirect
 	github.com/ebitengine/purego v0.7.1 // indirect
 	github.com/faiface/mainthread v0.0.0-20171120011319-8b78f0a41ae3 // indirect
 	github.com/gen2brain/raylib-go/raygui v0.0.0-20240628125141-62016ee92fc0 // indirect

@@ -40,9 +40,9 @@ func buildBokhylla() []*g.TableRowWidget {
 		g.Label("Betyg"),
 		g.Label("Utlånad?"),
 		g.Label("Utläst?"),
-	))
+	).Flags(g.TableRowFlagsHeaders))
 
-	for _, book := range state.books {
+	for i, book := range state.books {
 		if !doesBookPassSearchCheck(book) {
 			continue
 		}
@@ -51,10 +51,13 @@ func buildBokhylla() []*g.TableRowWidget {
 		b := book
 
 		rows = append(rows, g.TableRow(
-			g.Button("Edit").OnClick(func() {
-				state.bookToEdit = b
-				changeView(VIEW_EDIT_BOOK)
-			}),
+			g.Row(
+				g.Labelf("%v", i+1),
+				g.Button("Edit").OnClick(func() {
+					state.bookToEdit = b
+					changeView(VIEW_EDIT_BOOK)
+				}),
+			),
 			g.Label(b.Title),
 			g.Label(b.Author),
 			g.Label(starsToString(b.Stars)),
