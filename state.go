@@ -14,6 +14,11 @@ const (
 	VIEW_EDIT_BOOK
 )
 
+// Filter flag is a bitmask where each bit represents some type of filter
+const (
+	ONLY_EMPTY_ISBN = uint8(1 << 0)
+)
+
 // The book as it is represented in the application layer
 type Book struct {
 	ISBN   string
@@ -38,6 +43,7 @@ type State struct {
 	books             []Book
 	bookToEdit        Book
 	placeholderAuthor string
+	filterFlags       uint8
 
 	isbnInput         string
 	isbnResponse      ISBNResponse
@@ -55,6 +61,7 @@ var state = State{
 	isbnError:    "",
 	searchString: "",
 	isbnLoading:  false,
+	filterFlags:  0,
 }
 
 func resetAddBookState() {

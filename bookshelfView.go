@@ -29,6 +29,18 @@ func doesBookPassSearchCheck(book Book) bool {
 	return strings.Contains(content, s)
 }
 
+func doesBookPassFilter(book Book) bool {
+	if state.filterFlags&ONLY_EMPTY_ISBN != 0 {
+		if book.ISBN == "" {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	return true
+}
+
 func buildBokhylla() []*g.TableRowWidget {
 	var rows []*g.TableRowWidget
 
@@ -44,6 +56,10 @@ func buildBokhylla() []*g.TableRowWidget {
 
 	for i, book := range state.books {
 		if !doesBookPassSearchCheck(book) {
+			continue
+		}
+
+		if !doesBookPassFilter(book) {
 			continue
 		}
 
@@ -80,6 +96,15 @@ func bookshelfView() []g.Widget {
 			g.Label("Sök"),
 			g.InputText(&state.searchString),
 			g.Spacing(),
+		),
+		g.Row(
+			g.RadioButton("Bara böcker med tomma ISBN fält", state.filterFlags&ONLY_EMPTY_ISBN != 0).OnChange(func() {
+				if state.filterFlags&ONLY_EMPTY_ISBN != 0 {
+					state.filterFlags &= ^ONLY_EMPTY_ISBN
+				} else {
+					state.filterFlags |= ONLY_EMPTY_ISBN
+				}
+			}),
 		),
 		g.Table().Rows(buildBokhylla()...),
 	}
