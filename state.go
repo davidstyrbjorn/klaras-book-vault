@@ -12,6 +12,7 @@ const (
 	VIEW_ADD_BOOK
 	VIEW_BOOKSHELF
 	VIEW_EDIT_BOOK
+	VIEW_STATS
 )
 
 // Filter flag is a bitmask where each bit represents some type of filter

@@ -15,6 +15,8 @@ func viewReducer() []g.Widget {
 		return bookshelfView()
 	case VIEW_EDIT_BOOK:
 		return editBookView()
+	case VIEW_STATS:
+		return statsView()
 	}
 
 	return []g.Widget{}

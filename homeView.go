@@ -16,6 +16,9 @@ func homeView() []g.Widget {
 			g.Button("Bokhylla").OnClick(func() {
 				changeView(VIEW_BOOKSHELF)
 			}),
+			g.Button("Statistik (nörd)").OnClick(func() {
+				changeView(VIEW_STATS)
+			}),
 		)),
 
 		g.Spacing(), g.Spacing(), g.Spacing(),

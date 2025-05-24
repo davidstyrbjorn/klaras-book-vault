@@ -68,10 +68,9 @@ func editBookView() []g.Widget {
 		g.Align(g.AlignCenter).To(g.Column(
 			g.Label("Editera din bok"),
 			g.Row(
-				g.Labelf("ISBN = %v", state.bookToEdit.ISBN),
+				g.Label("ISBN"),
+				g.InputText(&state.bookToEdit.ISBN).Hint("ISBN"),
 			),
-			g.Spacing(),
-			g.Separator(),
 			g.Spacing(),
 			g.Column(
 				g.Label("Titel"),
