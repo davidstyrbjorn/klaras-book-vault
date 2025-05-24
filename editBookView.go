@@ -7,9 +7,18 @@ import (
 
 func saveEditedBook() {
 	for i := range state.books {
-		if state.books[i].ISBN == state.bookToEdit.ISBN {
-			state.books[i] = state.bookToEdit // Overwrite here
-			return
+		// Patch because some books don't have ISBN number
+		if state.bookToEdit.ISBN == "" {
+			if state.books[i].Title == state.bookToEdit.Title {
+				state.books[i] = state.bookToEdit // Overwrite here
+				g.Update()
+			}
+		} else {
+			if state.books[i].ISBN == state.bookToEdit.ISBN {
+				state.books[i] = state.bookToEdit // Overwrite here
+				g.Update()
+				return
+			}
 		}
 	}
 }

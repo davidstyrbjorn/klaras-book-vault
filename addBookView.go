@@ -1,11 +1,12 @@
 package main
 
 import (
-	"time"
 	"unicode"
 
 	g "github.com/AllenDang/giu"
 )
+
+var putFocusOnIsbnInput = false
 
 func verifyIsbnString(isbn string) (bool, string) {
 	result := ""
@@ -35,7 +36,7 @@ func onAddBookClick() {
 	state.isbnLoading = true
 	defer func() {
 		state.isbnLoading = false
-		state.isbnInput = ""
+		putFocusOnIsbnInput = true
 		g.Update()
 	}()
 	g.Update()
@@ -70,8 +71,9 @@ func onAddBookClick() {
 
 	// If we get to here, insert the book, dump into binary and set that we have no error!
 	state.books = append(state.books, Book{Title: state.isbnResponse.title, ISBN: state.isbnResponse.isbn, Author: state.isbnResponse.Author})
-	state.isbnError = "" // No error to show if we got to here!
 	go DumpBookToFile()
+	state.isbnError = "" // No error to show if we got to here!
+	state.isbnInput = ""
 }
 
 func manuallyAddBook() {
@@ -87,29 +89,22 @@ func manuallyAddBook() {
 	go DumpBookToFile()
 	state.isbnInput = ""
 	state.isbnError = ""
+	putFocusOnIsbnInput = true
 	g.Update()
 }
 
 func addBookView() []g.Widget {
 	return []g.Widget{
 		g.Button("Tillbaka").OnClick(func() { changeView(VIEW_HOME) }),
-		g.Align(g.AlignCenter).To(g.Column(g.Label("Lägg till bok"),
-			g.InputText(&state.isbnInput).Hint("Skanna ISBN Streckkod").OnChange(func() {
-				verified, isbn := verifyIsbnString(state.isbnInput)
-				state.isbnInput = isbn
-				if verified {
-					g.Update()
-					// Reset the timer
-					if state.isbnSearchTimer != nil {
-						state.isbnSearchTimer.Stop()
-					}
-					state.isbnSearchTimer = time.AfterFunc(300*time.Millisecond, func() {
-						if !state.isbnLoading {
-							go onAddBookClick()
-						}
-					})
+		g.Align(g.AlignCenter).To(g.Column(
+			g.Label("Lägg till bok"),
+			g.Custom(func() {
+				if putFocusOnIsbnInput {
+					putFocusOnIsbnInput = false
+					g.SetKeyboardFocusHere()
 				}
 			}),
+			g.InputText(&state.isbnInput).Hint("Skanna ISBN Streckkod").ID("isbn-input"),
 			g.Button("Sök").OnClick(func() {
 				go onAddBookClick()
 			}).Disabled(state.isbnLoading),

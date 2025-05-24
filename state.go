@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"time"
 
 	g "github.com/AllenDang/giu"
 )
@@ -46,18 +45,16 @@ type State struct {
 	isbnLoading       bool
 	manualInputTitle  string
 	manualInputAuthor string
-	isbnSearchTimer   *time.Timer
 }
 
 var state = State{
-	currentView:     VIEW_HOME,
-	books:           []Book{}, // Loaded from DB and kept in memory
-	isbnResponse:    ISBNResponse{title: ""},
-	isbnInput:       "",
-	isbnError:       "",
-	searchString:    "",
-	isbnLoading:     false,
-	isbnSearchTimer: nil,
+	currentView:  VIEW_HOME,
+	books:        []Book{}, // Loaded from DB and kept in memory
+	isbnResponse: ISBNResponse{title: ""},
+	isbnInput:    "",
+	isbnError:    "",
+	searchString: "",
+	isbnLoading:  false,
 }
 
 func resetAddBookState() {
@@ -66,7 +63,6 @@ func resetAddBookState() {
 	state.isbnError = ""
 	state.isbnResponse.title = ""
 	state.isbnLoading = false
-	state.isbnSearchTimer = nil
 }
 
 func pickRandomPlaceholderAuthor() {
@@ -87,6 +83,7 @@ func changeView(to int) {
 
 	if to == VIEW_ADD_BOOK {
 		resetAddBookState()
+		putFocusOnIsbnInput = true
 	}
 
 	if to == VIEW_EDIT_BOOK {
