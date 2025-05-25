@@ -19,6 +19,9 @@ func homeView() []g.Widget {
 			g.Button("Statistik (nörd)").OnClick(func() {
 				changeView(VIEW_STATS)
 			}),
+			g.Button("Skapa backup").OnClick(func() {
+				go persistBooks(BACKUP_FILE_NAME)
+			}),
 		)),
 
 		g.Spacing(), g.Spacing(), g.Spacing(),

@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/AllenDang/giu"
 	g "github.com/AllenDang/giu"
 )
@@ -23,15 +26,6 @@ func saveEditedBook() {
 	}
 }
 
-func checkForEdits() bool {
-	for i := range state.books {
-		if state.books[i].ISBN == state.bookToEdit.ISBN {
-			return state.books[i] != state.bookToEdit
-		}
-	}
-	return false
-}
-
 func removeEditedBook() {
 	for i := range state.books {
 		if state.books[i].ISBN == state.bookToEdit.ISBN {
@@ -48,7 +42,7 @@ func editBookView() []g.Widget {
 				giu.Button("Stäng och Spara").OnClick(func() {
 					giu.CloseCurrentPopup()
 					saveEditedBook()
-					go persistBooks()
+					go persistBooks("")
 
 					changeView(VIEW_BOOKSHELF)
 				}),
@@ -58,13 +52,6 @@ func editBookView() []g.Widget {
 				}),
 			),
 		),
-		g.Button("Tillbaka").OnClick(func() {
-			if checkForEdits() {
-				giu.OpenPopup("Du har osparade ändringar")
-			} else {
-				changeView(VIEW_BOOKSHELF)
-			}
-		}),
 		g.Align(g.AlignCenter).To(g.Column(
 			g.Label("Editera din bok"),
 			g.Row(
@@ -98,12 +85,30 @@ func editBookView() []g.Widget {
 				}),
 			),
 			g.Spacing(),
-			g.Checkbox("Utlånad?", &state.bookToEdit.Loaned),
-			g.Checkbox("Utläst?", &state.bookToEdit.Read),
+
+			g.Row(
+				g.Checkbox("Utläst?", &state.bookToEdit.Read).OnChange(func() {
+					fmt.Println("Utläst = ", state.bookToEdit.Read)
+					if state.bookToEdit.Read {
+						state.bookToEdit.DateRead = time.Now()
+					}
+				}),
+				g.Condition(state.bookToEdit.Read, g.DatePicker("", &state.bookToEdit.DateRead), g.Label("")),
+			),
+
+			g.Row(
+				g.Checkbox("Utlånad?", &state.bookToEdit.Loaned).OnChange(func() {
+					if state.bookToEdit.Loaned {
+						state.bookToEdit.DateLoaned = time.Now()
+					}
+				}),
+				g.Condition(state.bookToEdit.Loaned, g.DatePicker("", &state.bookToEdit.DateLoaned), g.Label("")),
+			),
+
 			g.Row(
 				g.Button("Spara").OnClick(func() {
 					saveEditedBook()
-					go persistBooks()
+					go persistBooks("")
 
 					changeView(VIEW_BOOKSHELF)
 				}),
@@ -112,7 +117,7 @@ func editBookView() []g.Widget {
 				}),
 				g.Button("Ta Bort Bok").OnClick(func() {
 					removeEditedBook()
-					go persistBooks()
+					go persistBooks("")
 
 					changeView(VIEW_BOOKSHELF)
 				}),

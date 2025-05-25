@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"time"
 
 	g "github.com/AllenDang/giu"
 )
@@ -22,13 +23,16 @@ const (
 
 // The book as it is represented in the application layer
 type Book struct {
-	ISBN   string `json:"isbn"`
-	Title  string `json:"title"`
-	Author string `json:"author"`
-	Read   bool   `json:"read"`
-	Loaned bool   `json:"loaned"`
-	Stars  int32  `json:"stars"`
-	Note   string `json:"note"`
+	ISBN       string    `json:"isbn"`
+	Title      string    `json:"title"`
+	Author     string    `json:"author"`
+	Read       bool      `json:"read"`
+	Loaned     bool      `json:"loaned"`
+	Stars      int32     `json:"stars"`
+	Note       string    `json:"note"`
+	DateAdded  time.Time `json:"dateAdded"`
+	DateRead   time.Time `json:"dateRead"`   // The date when Read went from false to true
+	DateLoaned time.Time `json:"dateLoaned"` // The date when Loaned went from false to true
 }
 
 type ISBNResponse struct {

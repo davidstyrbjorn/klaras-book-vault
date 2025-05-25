@@ -10,8 +10,12 @@ import (
 const FILE_NAME = "books.json"
 const BACKUP_FILE_NAME = "backup_books.json"
 
-func persistBooks() {
-	file, err := os.Create(FILE_NAME)
+func persistBooks(fileName string) {
+	if fileName == "" {
+		fileName = FILE_NAME
+	}
+
+	file, err := os.Create(fileName)
 	if err != nil {
 		log.Fatalf("Failed to create books file %v", err)
 	}
@@ -22,12 +26,12 @@ func persistBooks() {
 		log.Fatalf("Failed to marshal book list: %v", err)
 	}
 
-	err = os.WriteFile(FILE_NAME, data, 0644)
+	err = os.WriteFile(fileName, data, 0644)
 	if err != nil {
 		log.Fatalf("Failed to write books to file %v", err)
 	}
 
-	fmt.Println("Books saved to", FILE_NAME)
+	fmt.Println("Books saved to", fileName)
 }
 
 func loadBooks() {
