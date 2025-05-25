@@ -71,7 +71,7 @@ func onAddBookClick() {
 
 	// If we get to here, insert the book, dump into binary and set that we have no error!
 	state.books = append(state.books, Book{Title: state.isbnResponse.title, ISBN: state.isbnResponse.isbn, Author: state.isbnResponse.Author})
-	go DumpBookToFile()
+	go persistBooks()
 	state.isbnError = "" // No error to show if we got to here!
 	state.isbnInput = ""
 }
@@ -86,7 +86,7 @@ func manuallyAddBook() {
 		Stars:  0,
 		Note:   "",
 	})
-	go DumpBookToFile()
+	go persistBooks()
 	state.isbnInput = ""
 	state.isbnError = ""
 	putFocusOnIsbnInput = true

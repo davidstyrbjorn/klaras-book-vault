@@ -48,7 +48,7 @@ func editBookView() []g.Widget {
 				giu.Button("Stäng och Spara").OnClick(func() {
 					giu.CloseCurrentPopup()
 					saveEditedBook()
-					go DumpBookToFile()
+					go persistBooks()
 
 					changeView(VIEW_BOOKSHELF)
 				}),
@@ -103,7 +103,7 @@ func editBookView() []g.Widget {
 			g.Row(
 				g.Button("Spara").OnClick(func() {
 					saveEditedBook()
-					go DumpBookToFile()
+					go persistBooks()
 
 					changeView(VIEW_BOOKSHELF)
 				}),
@@ -112,7 +112,7 @@ func editBookView() []g.Widget {
 				}),
 				g.Button("Ta Bort Bok").OnClick(func() {
 					removeEditedBook()
-					go DumpBookToFile()
+					go persistBooks()
 
 					changeView(VIEW_BOOKSHELF)
 				}),

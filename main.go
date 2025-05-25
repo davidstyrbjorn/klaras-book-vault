@@ -32,9 +32,7 @@ func onAnyKeyPressed(_ g.Key, _ g.Modifier, action g.Action) {
 }
 
 func main() {
-	if err := LoadBooksFromFile(); err != nil {
-		println("Can't find books binary file!")
-	}
+	loadBooks()
 
 	w := g.NewMasterWindow("Klaras Bok Valv", 800, 800, 0)
 	w.SetAdditionalInputHandlerCallback(onAnyKeyPressed)
