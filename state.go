@@ -22,13 +22,13 @@ const (
 
 // The book as it is represented in the application layer
 type Book struct {
-	ISBN   string
-	Title  string
-	Author string
-	Read   bool
-	Loaned bool
-	Stars  int32
-	Note   string
+	ISBN   string `json:"isbn"`
+	Title  string `json:"title"`
+	Author string `json:"author"`
+	Read   bool   `json:"read"`
+	Loaned bool   `json:"loaned"`
+	Stars  int32  `json:"stars"`
+	Note   string `json:"note"`
 }
 
 type ISBNResponse struct {
