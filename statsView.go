@@ -17,6 +17,9 @@ func statsView() []g.Widget {
 		}
 	}
 
+	percntageReadBooks := float32(float32(readBooks)/float32(len(state.books))) * 100
+	percentageLoanedBooks := float32(loanedBooks) / float32(len(state.books)) * 100
+
 	return g.Layout{
 		g.Button("Tillbaka").OnClick(func() {
 			changeView(VIEW_HOME)
@@ -30,11 +33,11 @@ func statsView() []g.Widget {
 				),
 				g.Row(
 					g.Label("Utlästa böcker: "),
-					g.Labelf("%v (%.2f%%)", readBooks, float32(float32(readBooks)/float32(len(state.books)))),
+					g.Labelf("%v (%.2f%%)", readBooks, percntageReadBooks),
 				),
 				g.Row(
 					g.Label("Utlånade böcker: "),
-					g.Labelf("%v (%.2f%%)", loanedBooks, float32(loanedBooks)/float32(len(state.books))),
+					g.Labelf("%v (%.2f%%)", loanedBooks, percentageLoanedBooks),
 				),
 			),
 		),
