@@ -21,6 +21,10 @@ const (
 	ONLY_EMPTY_ISBN = uint8(1 << 0)
 )
 
+const (
+	NUM_SORTABLE_FIELDS = 5
+)
+
 // The book as it is represented in the application layer
 type Book struct {
 	ISBN       string    `json:"isbn"`
@@ -44,11 +48,13 @@ type ISBNResponse struct {
 type State struct {
 	currentView int
 
-	searchString      string
-	books             []Book
-	bookToEdit        Book
-	placeholderAuthor string
-	filterFlags       uint8
+	searchString        string
+	books               []Book
+	bookToEdit          Book
+	placeholderAuthor   string
+	filterFlags         uint8
+	currentSortingField uint8
+	sortingDirections   [NUM_SORTABLE_FIELDS]g.Direction
 
 	isbnInput         string
 	isbnResponse      ISBNResponse
@@ -100,6 +106,13 @@ func changeView(to int) {
 
 	if to == VIEW_EDIT_BOOK {
 		pickRandomPlaceholderAuthor()
+	}
+
+	if to == VIEW_BOOKSHELF {
+		for i, _ := range state.sortingDirections {
+			fmt.Println("Yo = ", i)
+			state.sortingDirections[i] = g.DirectionDown
+		}
 	}
 
 	state.currentView = to

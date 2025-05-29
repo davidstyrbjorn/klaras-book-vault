@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	g "github.com/AllenDang/giu"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -34,11 +32,15 @@ func onAnyKeyPressed(_ g.Key, _ g.Modifier, action g.Action) {
 }
 
 func main() {
-	loadBooks()
+	//loadBooks()
 
-	for i, _ := range state.books {
-		state.books[i].DateAdded = time.Now()
-	}
+	//for i, _ := range state.books {
+	//	state.books[i].DateAdded = time.Now()
+	//}
+
+	//LoadBooksFromFile()
+	//persistBooks("")
+	loadBooks()
 
 	// persistBooks("")
 

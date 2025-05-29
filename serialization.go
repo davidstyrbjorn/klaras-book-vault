@@ -52,10 +52,6 @@ func loadBooks() {
 	}
 }
 
-func createBackup() {
-
-}
-
 func insert10DummyBooks() {
 	state.books = append(state.books, Book{ISBN: "9780451524935", Title: "1984", Author: "George Orwell", Note: "Så dålig lol", Stars: 1})
 	state.books = append(state.books, Book{ISBN: "9780316033803", Title: "The Great Gatsby", Author: "F. Scott Fitzgerald", Note: "funkar OK", Stars: 2})

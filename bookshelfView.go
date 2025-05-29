@@ -1,10 +1,35 @@
 package main
 
 import (
+	"sort"
 	"strings"
 
 	g "github.com/AllenDang/giu"
 )
+
+type SortyByBook []Book
+
+func (a SortyByBook) Len() int      { return len(a) }
+func (a SortyByBook) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a SortyByBook) Less(i, j int) bool {
+	switch state.currentSortingField {
+	case 0:
+		return strings.ToLower(a[i].Title) < strings.ToLower(a[j].Title)
+	case 1:
+		return strings.ToLower(a[i].Author) < strings.ToLower(a[j].Author)
+	case 2:
+		return a[i].Stars < a[j].Stars
+	case 3:
+		return a[i].Loaned && !a[j].Loaned
+	case 4:
+		return a[i].Read && !a[j].Read
+	default:
+		break
+	}
+
+	const BALLS = false
+	return BALLS
+}
 
 func starsToString(stars int32) string {
 	result := ""
@@ -41,17 +66,51 @@ func doesBookPassFilter(book Book) bool {
 	return true
 }
 
+func reverse() {
+	lastIndex := len(state.books) - 1
+	for i := range len(state.books) / 2 {
+		j := lastIndex - i
+		state.books[i], state.books[j] = state.books[j], state.books[i]
+	}
+}
+
+func rowHeaderPressed(what uint8) {
+	if state.sortingDirections[what] == g.DirectionUp {
+		state.sortingDirections[what] = g.DirectionDown
+	} else {
+		state.sortingDirections[what] = g.DirectionUp
+	}
+
+	state.currentSortingField = what
+
+	var sortyByBooks SortyByBook = state.books
+	sort.Sort(sortyByBooks)
+	if state.sortingDirections[state.currentSortingField] == g.DirectionUp {
+		reverse()
+	}
+}
+
 func buildBokhylla() []*g.TableRowWidget {
 	var rows []*g.TableRowWidget
 
 	// Column headers
 	rows = append(rows, g.TableRow(
 		g.Label(""),
-		g.Label("Titel"),
-		g.Label("Författare"),
-		g.Label("Betyg"),
-		g.Label("Utlånad?"),
-		g.Label("Utläst?"),
+		g.Row(g.Label("Titel"), g.ArrowButton(state.sortingDirections[0]).OnClick(func() {
+			rowHeaderPressed(0)
+		})),
+		g.Row(g.Label("Författare"), g.ArrowButton(state.sortingDirections[1]).OnClick(func() {
+			rowHeaderPressed(1)
+		})),
+		g.Row(g.Label("Betyg"), g.ArrowButton(state.sortingDirections[2]).OnClick(func() {
+			rowHeaderPressed(2)
+		})),
+		g.Row(g.Label("Utlånad?"), g.ArrowButton(state.sortingDirections[3]).OnClick(func() {
+			rowHeaderPressed(3)
+		})),
+		g.Row(g.Label("Utläst?"), g.ArrowButton(state.sortingDirections[4]).OnClick(func() {
+			rowHeaderPressed(4)
+		})),
 	).Flags(g.TableRowFlagsHeaders))
 
 	for i, book := range state.books {
