@@ -53,8 +53,8 @@ type State struct {
 	bookToEdit          Book
 	placeholderAuthor   string
 	filterFlags         uint8
-	currentSortingField uint8
-	sortingDirections   [NUM_SORTABLE_FIELDS]g.Direction
+	currentSortingField int8
+	ascending           bool // true = down, false = up
 
 	isbnInput         string
 	isbnResponse      ISBNResponse
@@ -65,14 +65,15 @@ type State struct {
 }
 
 var state = State{
-	currentView:  VIEW_HOME,
-	books:        []Book{}, // Loaded from DB and kept in memory
-	isbnResponse: ISBNResponse{title: ""},
-	isbnInput:    "",
-	isbnError:    "",
-	searchString: "",
-	isbnLoading:  false,
-	filterFlags:  0,
+	currentView:         VIEW_HOME,
+	books:               []Book{}, // Loaded from DB and kept in memory
+	isbnResponse:        ISBNResponse{title: ""},
+	isbnInput:           "",
+	isbnError:           "",
+	searchString:        "",
+	isbnLoading:         false,
+	filterFlags:         0,
+	currentSortingField: -1,
 }
 
 func resetAddBookState() {
@@ -109,10 +110,6 @@ func changeView(to int) {
 	}
 
 	if to == VIEW_BOOKSHELF {
-		for i, _ := range state.sortingDirections {
-			fmt.Println("Yo = ", i)
-			state.sortingDirections[i] = g.DirectionDown
-		}
 	}
 
 	state.currentView = to

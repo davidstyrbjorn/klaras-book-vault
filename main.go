@@ -32,15 +32,17 @@ func onAnyKeyPressed(_ g.Key, _ g.Modifier, action g.Action) {
 }
 
 func main() {
-	//loadBooks()
+	loadBooks()
 
-	//for i, _ := range state.books {
-	//	state.books[i].DateAdded = time.Now()
-	//}
+	// t := time.Now()
+	// for i, _ := range state.books {
+	// 	state.books[i].DateAdded = t
+	// 	t = t.Add(time.Second)
+	// }
 
 	//LoadBooksFromFile()
-	//persistBooks("")
-	loadBooks()
+	// persistBooks("")
+	// loadBooks()
 
 	// persistBooks("")
 

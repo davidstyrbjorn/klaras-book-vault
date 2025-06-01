@@ -24,7 +24,7 @@ func (a SortyByBook) Less(i, j int) bool {
 	case 4:
 		return a[i].Read && !a[j].Read
 	default:
-		break
+		return a[i].DateAdded.After(a[j].DateAdded)
 	}
 
 	const BALLS = false
@@ -66,6 +66,7 @@ func doesBookPassFilter(book Book) bool {
 	return true
 }
 
+// This function just takes the books we have and reverse them
 func reverse() {
 	lastIndex := len(state.books) - 1
 	for i := range len(state.books) / 2 {
@@ -74,19 +75,38 @@ func reverse() {
 	}
 }
 
-func rowHeaderPressed(what uint8) {
-	if state.sortingDirections[what] == g.DirectionUp {
-		state.sortingDirections[what] = g.DirectionDown
+func rowHeaderPressed(what int8) {
+	// Did we click the one we are already on? if so apply some extra logic
+	if what == state.currentSortingField {
+		if !state.ascending {
+			state.ascending = true
+		} else {
+			what = -1
+		}
 	} else {
-		state.sortingDirections[what] = g.DirectionUp
+		state.ascending = false
 	}
-
 	state.currentSortingField = what
 
+	// Perform sort, reverse if ascending is false
 	var sortyByBooks SortyByBook = state.books
 	sort.Sort(sortyByBooks)
-	if state.sortingDirections[state.currentSortingField] == g.DirectionUp {
+	if state.ascending {
 		reverse()
+	}
+
+	g.Update()
+}
+
+func getArrowDirectionForRowHeader(what int8) g.Direction {
+	if what != state.currentSortingField {
+		return g.DirectionRight
+	}
+
+	if state.ascending {
+		return g.DirectionUp
+	} else {
+		return g.DirectionDown
 	}
 }
 
@@ -96,19 +116,19 @@ func buildBokhylla() []*g.TableRowWidget {
 	// Column headers
 	rows = append(rows, g.TableRow(
 		g.Label(""),
-		g.Row(g.Label("Titel"), g.ArrowButton(state.sortingDirections[0]).OnClick(func() {
+		g.Row(g.Label("Titel"), g.ArrowButton(getArrowDirectionForRowHeader(0)).OnClick(func() {
 			rowHeaderPressed(0)
 		})),
-		g.Row(g.Label("Författare"), g.ArrowButton(state.sortingDirections[1]).OnClick(func() {
+		g.Row(g.Label("Författare"), g.ArrowButton(getArrowDirectionForRowHeader(1)).OnClick(func() {
 			rowHeaderPressed(1)
 		})),
-		g.Row(g.Label("Betyg"), g.ArrowButton(state.sortingDirections[2]).OnClick(func() {
+		g.Row(g.Label("Betyg"), g.ArrowButton(getArrowDirectionForRowHeader(2)).OnClick(func() {
 			rowHeaderPressed(2)
 		})),
-		g.Row(g.Label("Utlånad?"), g.ArrowButton(state.sortingDirections[3]).OnClick(func() {
+		g.Row(g.Label("Utlånad?"), g.ArrowButton(getArrowDirectionForRowHeader(3)).OnClick(func() {
 			rowHeaderPressed(3)
 		})),
-		g.Row(g.Label("Utläst?"), g.ArrowButton(state.sortingDirections[4]).OnClick(func() {
+		g.Row(g.Label("Utläst?"), g.ArrowButton(getArrowDirectionForRowHeader(4)).OnClick(func() {
 			rowHeaderPressed(4)
 		})),
 	).Flags(g.TableRowFlagsHeaders))
